@@ -1,0 +1,87 @@
+name: Build Windows Binary
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  CRYPTIFY_KEY: ${{ secrets.CRYPTIFY_KEY }}
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: x86_64-pc-windows-msvc
+    
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-registry-
+    
+    - name: Cache cargo index
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/git
+        key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-git-
+    
+    - name: Cache target directory
+      uses: actions/cache@v4
+      with:
+        path: target
+        key: ${{ runner.os }}-target-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-target-
+    
+    - name: Build release binary
+      run: cargo build --release --target x86_64-pc-windows-msvc
+    
+    - name: Get version from Cargo.toml
+      id: version
+      shell: pwsh
+      run: |
+        $version = (Select-String -Path "Cargo.toml" -Pattern 'version = "(.+)"' | Select-Object -First 1).Matches.Groups[1].Value
+        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+        echo "Version: $version"
+    
+    - name: Rename binary with version
+      shell: pwsh
+      run: |
+        $version = "${{ steps.version.outputs.VERSION }}"
+        $commit = "${{ github.sha }}".Substring(0, 7)
+        $filename = "funsomware-v$version-$commit-windows-x64.exe"
+        Copy-Item "target/x86_64-pc-windows-msvc/release/funsomware.exe" $filename
+        echo "BINARY_NAME=$filename" >> $env:GITHUB_OUTPUT
+      id: rename
+    
+    - name: Upload Windows binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: funsomware-windows-x64
+        path: funsomware-*.exe
+        retention-days: 90
+    
+    - name: Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: funsomware-*.exe
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

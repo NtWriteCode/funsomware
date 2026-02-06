@@ -1,0 +1,10 @@
+[package]
+name = "funsomware"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cryptify = "3.2.1"
+rayon = "1.10"
+walkdir = "2.5"
+rand = "0.8"
