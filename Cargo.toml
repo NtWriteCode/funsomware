@@ -8,6 +8,9 @@ cryptify = "3.2.1"
 rayon = "1.10"
 walkdir = "2.5"
 rand = "0.10"
-native-dialog = "0.9.6"
 dirs-next = "2.0"
 wallpaper = "3.2.0"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["winuser", "errhandlingapi", "libloaderapi", "wingdi", "winnt", "consoleapi"] }
+windows = { version = "0.58", features = ["Win32_System_Com", "Win32_UI_Shell"] }
