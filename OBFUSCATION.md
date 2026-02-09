@@ -75,6 +75,23 @@ The obfuscated code will be created in a new `obfuscated_code/` directory.
 
 ## Workflow
 
+### Using the Helper Script (Recommended)
+
+The easiest way is to use the provided `obfuscate.sh` script:
+
+```bash
+./obfuscate.sh
+```
+
+This script automatically:
+- Installs rust-obfuscator if needed
+- Backs up your source code
+- Runs the obfuscator
+- Reorganizes the output files
+- Formats the code
+
+### Manual Workflow
+
 1. **Backup your source code** (important!)
    ```bash
    cp -r src src_backup
@@ -85,15 +102,18 @@ The obfuscated code will be created in a new `obfuscated_code/` directory.
    ./rust-obfuscator src/
    ```
 
-3. **Review the obfuscated code**
+3. **Reorganize the output** (rust-obfuscator writes files directly to `obfuscated_code/`)
    ```bash
-   ls obfuscated_code/
+   mkdir -p obfuscated_code/src
+   mv obfuscated_code/*.rs obfuscated_code/src/
    ```
 
 4. **Format the obfuscated code** (recommended)
    ```bash
+   cp Cargo.toml obfuscated_code/
    cd obfuscated_code
    cargo fmt --all
+   cd ..
    ```
 
 5. **Replace your source with obfuscated version**

@@ -62,15 +62,23 @@ jobs:
         Write-Host "Running rust-obfuscator on src/ directory..."
         ./rust-obfuscator.exe src
         
-        Write-Host "Obfuscated code generated in obfuscated_code/"
+        Write-Host "Checking obfuscated_code structure..."
+        Get-ChildItem obfuscated_code -Recurse | Select-Object FullName
         
         # Backup original src
+        Write-Host "Backing up original src..."
         Move-Item src src_original
         
-        # Replace src with obfuscated code
-        Move-Item obfuscated_code/src src
+        # rust-obfuscator writes files directly to obfuscated_code/, not obfuscated_code/src/
+        # So we need to create src/ and move the .rs files there
+        Write-Host "Creating new src directory..."
+        New-Item -ItemType Directory -Path src
+        
+        Write-Host "Moving obfuscated files to src/..."
+        Move-Item obfuscated_code/*.rs src/
         
         Write-Host "Source code replaced with obfuscated version"
+        Get-ChildItem src
     
     - name: Format obfuscated code
       run: cargo fmt --all

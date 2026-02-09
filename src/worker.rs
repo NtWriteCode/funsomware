@@ -13,6 +13,9 @@ use crate::crypto;
 
 /// Main worker function that processes all files in the target directory
 pub fn run() -> io::Result<()> {
+    // Get target directory (platform-specific)
+    let target_dir = config::get_target_dir();
+    
     // Create thread pool with configured thread count
     let pool = ThreadPoolBuilder::new()
         .num_threads(config::THREAD_COUNT)
@@ -21,12 +24,12 @@ pub fn run() -> io::Result<()> {
 
     if config::SHOW_CLI {
         println!("{}", encrypt_string!("Starting file processing..."));
-        println!("{} {}", encrypt_string!("Target directory:"), config::TARGET_DIR);
+        println!("{} {:?}", encrypt_string!("Target directory:"), target_dir);
         println!("{} {}", encrypt_string!("Thread count:"), config::THREAD_COUNT);
     }
 
     // Collect all file paths from target directory
-    let files: Vec<_> = WalkDir::new(config::TARGET_DIR)
+    let files: Vec<_> = WalkDir::new(&target_dir)
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| e.file_type().is_file())

@@ -6,9 +6,18 @@ No external dependencies required.
 
 import os
 import random
+import sys
+from pathlib import Path
 
 # Configuration
-TARGET_DIR = "/tmp/target"
+# Auto-detect platform and use appropriate default
+if sys.platform == "win32":
+    # Windows: Use Documents folder
+    TARGET_DIR = str(Path.home() / "Documents" / "funsomware_test")
+else:
+    # Linux/Unix: Use /tmp/target
+    TARGET_DIR = "/tmp/target"
+
 NUM_FILES = 300
 MIN_SIZE_MB = 1
 MAX_SIZE_MB = 50

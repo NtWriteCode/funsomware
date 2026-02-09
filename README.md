@@ -7,6 +7,9 @@ A Rust-based file encryption tool with obfuscated code using the `cryptify` crat
 - **Multi-threaded processing**: Uses 64 threads by default (configurable)
 - **Fast XOR cipher**: Custom FNV-1a-inspired stream cipher for fast encryption
 - **Code obfuscation**: All strings and control flows obfuscated with `cryptify`
+- **Cross-platform GUI**: Native message boxes on Windows and Linux
+- **Wallpaper changer**: Drops and sets a custom wallpaper after encryption
+- **Embedded resources**: Wallpaper image embedded in the binary
 - **Configurable**: Easy-to-modify configuration in `src/config.rs`
 - **CLI output**: Optional debug output showing processing status
 
@@ -14,10 +17,18 @@ A Rust-based file encryption tool with obfuscated code using the `cryptify` crat
 
 Edit `src/config.rs` to customize:
 
-- `TARGET_DIR`: Directory to process (default: `/tmp/target`)
+- `TARGET_DIR`: Directory to process (default: empty = auto-detect)
+  - Windows: Uses Documents folder
+  - Linux: Uses `/tmp/target`
 - `PASSWORD`: Encryption password (default: `MySecretPassword123!`)
 - `THREAD_COUNT`: Number of worker threads (default: `64`)
 - `SHOW_CLI`: Show debug output (default: `true`)
+- `SHOW_MESSAGEBOXES`: Show GUI message boxes (default: `true`)
+- `MESSAGEBOX_LOOP_COUNT`: How many times to show the message box (default: `100`, set to `0` for infinite)
+- `MESSAGEBOX_DELAY_SECONDS`: Delay between message boxes in seconds (default: `2`)
+- `SET_WALLPAPER`: Change desktop wallpaper after encryption (default: `true`)
+- `MESSAGEBOX_TITLE`: Custom message box title (default: "⚠ CRITICAL SYSTEM ERROR ⚠")
+- `MESSAGEBOX_TEXT`: Custom message box text (default: cryptic error message)
 
 ## Building
 
@@ -39,13 +50,19 @@ Or run the binary directly:
 
 ## How It Works
 
-1. Recursively scans the target directory for files
-2. Processes each file in parallel using a thread pool
-3. For each file:
+1. Determines target directory (Windows: Documents, Linux: /tmp/target)
+2. Recursively scans the target directory for files
+3. Processes each file in parallel using a thread pool
+4. For each file:
    - Reads the entire file into memory
    - Encrypts using XOR stream cipher with the configured password
    - Sleeps for a random duration (1-5 seconds)
    - Writes the encrypted data back to the file
+5. **Extracts and sets wallpaper** to warning screen
+6. **Spawns message box hell** - 100 message boxes appear every 2 seconds (non-blocking) 😈
+   - Each message box runs in its own thread
+   - They don't wait for user interaction
+   - New ones keep spawning while old ones are still open
 
 ## Encryption Algorithm
 
@@ -71,13 +88,18 @@ For automatic source code obfuscation using `rust-obfuscator`, see [OBFUSCATION.
 
 ```
 funsomware/
-├── Cargo.toml       # Dependencies and project metadata
+├── Cargo.toml                # Dependencies and project metadata
+├── rsrc/
+│   └── wallpaper.png         # Embedded wallpaper image
 ├── src/
-│   ├── main.rs      # Entry point with CLI banner
-│   ├── config.rs    # Configuration constants
-│   ├── crypto.rs    # XOR stream cipher implementation
-│   └── worker.rs    # Multi-threaded file processing
-└── README.md        # This file
+│   ├── main.rs               # Entry point with CLI banner
+│   ├── config.rs             # Configuration constants
+│   ├── crypto.rs             # XOR stream cipher implementation
+│   ├── worker.rs             # Multi-threaded file processing
+│   ├── wallpaper_manager.rs  # Wallpaper extraction and setting
+│   └── messagebox_spawner.rs # Non-blocking message box spawner
+├── generate_wallpaper.py     # Script to create custom wallpaper
+└── README.md                 # This file
 ```
 
 ## Dependencies
@@ -86,6 +108,24 @@ funsomware/
 - `rayon` - Data parallelism library
 - `walkdir` - Recursive directory traversal
 - `rand` - Random number generation
+- `native-dialog` - Cross-platform message boxes
+- `wallpaper` - Cross-platform wallpaper setting
+- `dirs-next` - Platform-specific directory detection
+
+### Linux Requirements
+
+On Linux, you need either **Zenity** or **Kdialog** installed for message boxes to work:
+
+```bash
+# Ubuntu/Debian
+sudo apt install zenity
+
+# Fedora/RHEL
+sudo dnf install zenity
+
+# Arch
+sudo pacman -S zenity
+```
 
 ## Testing
 

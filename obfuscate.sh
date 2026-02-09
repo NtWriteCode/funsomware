@@ -60,18 +60,31 @@ echo "Running rust-obfuscator on src/ directory..."
 ./"$OBFUSCATOR_BIN" src "$@"
 echo ""
 
-# Format obfuscated code
+# Check and reorganize obfuscated code
 if [ -d "obfuscated_code" ]; then
+    echo "Checking obfuscated code structure..."
+    
+    # rust-obfuscator writes .rs files directly to obfuscated_code/, not obfuscated_code/src/
+    # We need to create the src/ subdirectory structure
+    if [ ! -d "obfuscated_code/src" ]; then
+        echo "Reorganizing obfuscated files..."
+        mkdir -p obfuscated_code/src
+        mv obfuscated_code/*.rs obfuscated_code/src/ 2>/dev/null || true
+    fi
+    
     echo "Formatting obfuscated code..."
+    # Create a temporary Cargo.toml in obfuscated_code for formatting
+    cp Cargo.toml obfuscated_code/
     cd obfuscated_code
     cargo fmt --all 2>/dev/null || true
+    rm Cargo.toml
     cd ..
     echo ""
     
     echo "Obfuscated code generated in: obfuscated_code/"
     echo ""
     echo "Next steps:"
-    echo "  1. Review the obfuscated code in obfuscated_code/"
+    echo "  1. Review the obfuscated code in obfuscated_code/src/"
     echo "  2. To use it, run: rm -rf src && mv obfuscated_code/src src"
     echo "  3. To restore original: rm -rf src && mv src_backup src"
     echo ""
