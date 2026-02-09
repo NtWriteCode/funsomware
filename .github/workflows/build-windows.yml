@@ -48,12 +48,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-target-
     
-    - name: Install Python dependencies for icon conversion
-      run: pip install Pillow
-    
-    - name: Convert icon PNG to ICO
-      run: python convert_icon.py
-    
     - name: Build release binary
       run: cargo build --release --target x86_64-pc-windows-msvc
     
