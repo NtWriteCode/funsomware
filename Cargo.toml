@@ -14,3 +14,6 @@ wallpaper = "3.2.0"
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["winuser", "errhandlingapi", "libloaderapi", "wingdi", "winnt", "consoleapi"] }
 windows = { version = "0.58", features = ["Win32_System_Com", "Win32_UI_Shell"] }
+
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1"

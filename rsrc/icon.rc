@@ -1,0 +1,5 @@
+// Windows resource file for application icon
+// This embeds the icon into the executable
+
+// Icon with ID 1 is the application icon
+1 ICON "icon.ico"

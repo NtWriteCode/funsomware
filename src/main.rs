@@ -109,7 +109,8 @@ fn show_error_messagebox(message: &str) {
     let title = "FUNSOMWARE - Error";
     
     unsafe {
-        let title_wide: Vec<u16> = OsStr::new(title)
+        // Use &title[..] to handle both &str and String from obfuscator
+        let title_wide: Vec<u16> = OsStr::new(&title[..])
             .encode_wide()
             .chain(std::iter::once(0))
             .collect();
