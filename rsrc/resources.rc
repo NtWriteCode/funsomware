@@ -1,0 +1,84 @@
+// Resource file for DocuWriter Pro
+// Adds legitimate-looking string tables and dialog resources
+
+#include <windows.h>
+
+// String table for UI elements (makes it look like a real application)
+STRINGTABLE
+BEGIN
+    1001, "DocuWriter Pro"
+    1002, "File"
+    1003, "Edit"
+    1004, "View"
+    1005, "Insert"
+    1006, "Format"
+    1007, "Tools"
+    1008, "Help"
+    1009, "New Document"
+    1010, "Open Document"
+    1011, "Save Document"
+    1012, "Save As..."
+    1013, "Print"
+    1014, "Exit"
+    1015, "Cut"
+    1016, "Copy"
+    1017, "Paste"
+    1018, "Undo"
+    1019, "Redo"
+    1020, "Find and Replace"
+    1021, "Preferences"
+    1022, "About DocuWriter Pro"
+    1023, "Check for Updates"
+    1024, "User Manual"
+    1025, "Report a Bug"
+    1026, "Font"
+    1027, "Paragraph"
+    1028, "Styles"
+    1029, "Page Setup"
+    1030, "Zoom"
+END
+
+// Fake dialog resource (never actually used, just for appearance)
+IDD_ABOUT_DIALOG DIALOGEX 0, 0, 300, 200
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About DocuWriter Pro"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    DEFPUSHBUTTON   "OK", IDOK, 120, 170, 60, 14
+    LTEXT           "DocuWriter Pro", IDC_STATIC, 10, 10, 280, 20
+    LTEXT           "Version 3.2.1", IDC_STATIC, 10, 30, 280, 10
+    LTEXT           "Copyright © 2024-2026 Productivity Solutions Inc.", IDC_STATIC, 10, 50, 280, 10
+    LTEXT           "All rights reserved.", IDC_STATIC, 10, 70, 280, 10
+END
+
+// Fake menu resource
+IDR_MAINMENU MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N", 1009
+        MENUITEM "&Open...\tCtrl+O", 1010
+        MENUITEM "&Save\tCtrl+S", 1011
+        MENUITEM "Save &As...", 1012
+        MENUITEM SEPARATOR
+        MENUITEM "&Print\tCtrl+P", 1013
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit", 1014
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z", 1018
+        MENUITEM "&Redo\tCtrl+Y", 1019
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X", 1015
+        MENUITEM "&Copy\tCtrl+C", 1016
+        MENUITEM "&Paste\tCtrl+V", 1017
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&User Manual", 1024
+        MENUITEM "&Check for Updates", 1023
+        MENUITEM SEPARATOR
+        MENUITEM "&About DocuWriter Pro", 1022
+    END
+END

@@ -10,9 +10,10 @@ walkdir = "2.5"
 rand = "0.10"
 dirs-next = "2.0"
 wallpaper = "3.2.0"
+num_cpus = "1.16"
 
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3", features = ["winuser", "errhandlingapi", "libloaderapi", "wingdi", "winnt", "consoleapi"] }
+winapi = { version = "0.3", features = ["winuser", "errhandlingapi", "libloaderapi", "wingdi", "winnt", "consoleapi", "debugapi", "sysinfoapi"] }
 windows = { version = "0.58", features = ["Win32_System_Com", "Win32_UI_Shell"] }
 
 [target.'cfg(windows)'.build-dependencies]
