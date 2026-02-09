@@ -1,5 +1,4 @@
 use cryptify::{encrypt_string, flow_stmt};
-use native_dialog::{MessageDialog, MessageType};
 use std::thread;
 use std::time::Duration;
 
@@ -73,11 +72,13 @@ fn main() {
             
             // Show error message box
             if config::SHOW_MESSAGEBOXES {
-                MessageDialog::new()
-                    .set_type(MessageType::Error)
+                use native_dialog::{DialogBuilder, MessageLevel};
+                DialogBuilder::message()
+                    .set_level(MessageLevel::Error)
                     .set_title(&encrypt_string!("FUNSOMWARE - Error"))
                     .set_text(&format!("{}: {}", encrypt_string!("Fatal error"), e))
-                    .show_alert()
+                    .alert()
+                    .show()
                     .ok();
             }
             

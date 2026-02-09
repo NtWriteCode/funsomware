@@ -1,5 +1,5 @@
 use cryptify::encrypt_string;
-use native_dialog::{MessageDialog, MessageType};
+use native_dialog::{DialogBuilder, MessageLevel};
 use std::thread;
 use std::time::Duration;
 
@@ -45,11 +45,12 @@ fn spawn_single_messagebox() {
     
     // Each message box runs in its own thread
     thread::spawn(move || {
-        MessageDialog::new()
-            .set_type(MessageType::Error)
+        DialogBuilder::message()
+            .set_level(MessageLevel::Error)
             .set_title(&title)
             .set_text(&text)
-            .show_alert()
+            .alert()
+            .show()
             .ok();
     });
 }
